@@ -6,9 +6,6 @@ The lexer.
 (c) 1993-1996 Andy Gill, Simon Marlow
 -----------------------------------------------------------------------------
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 400
-#define isAlphaNum isAlphanum
-#endif
 
 > module Lexer (
 >       Token(..),
@@ -50,11 +47,6 @@ The lexer.
 >       | TokBar                -- |
 >       deriving (Eq,Ord
 
-#ifdef DEBUG
-
->       	,Show
-
-#endif
 
 >		)
 

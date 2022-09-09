@@ -24,7 +24,6 @@ Here is our mid-section datatype
 > import AbsSyn
 
 > import Array
-> import IOExts
 
 epsilon		= 0
 error		= 1
@@ -62,29 +61,6 @@ ProduceCode.lhs and the various HappyTemplates.
 > getNames :: Grammar -> [Name]
 > getNames  (Grammar {terminals = ts, non_terminals = nts}) = ts ++ nts
 
-#ifdef DEBUG
-
-> instance Show Grammar where
->       showsPrec _ (Grammar 
->		{ productions		= p
->               , directives		= d
->               , terminals		= ts
->               , non_terminals		= nts
->		, types			= tys
->               , token_names		= e
->		, first_term		= ft
->               , eof_term		= eof
->	 	})
->	 =      shows p . showString "\n" .
->               shows d . showString "\n" .
->               shows ts . showString "\n" .
->               shows nts . showString "\n" .
->               shows tys . showString "\n" .
->               shows e . showString "\n" .
->		shows ft . showString "\n" .
->               shows eof . showString "\n"
-
-#endif
 
 > startName = "%start"			-- Token 2
 > eofName   = "%eof"			
@@ -247,11 +223,6 @@ So is this.
 >		| LR'Multiple [LRAction] LRAction	-- conflict
 >       deriving(Eq
 
-#ifdef DEBUG
-
->	,Show
-
-#endif
 
 >	)	
 
@@ -270,11 +241,6 @@ So is this.
 > data Goto = Goto Int | NoGoto 
 >       deriving(Eq
 
-#ifdef DEBUG
-
->	,Show
-
-#endif
 
 >	)	
 

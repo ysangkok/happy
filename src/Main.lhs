@@ -22,7 +22,6 @@ The main driver.
 > import Target (Target(..))
 > import GetOpt
 > import Set
-> import IntSet
 
 > import System
 > import Char
@@ -30,15 +29,8 @@ The main driver.
 > import Array( Array, assocs, elems, (!) )
 > import List( nub )
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 400
-> import PrelGHC (unsafeCoerce#)
-> import IOExts
-#define sCC _scc_
-> coerceParser = unsafeCoerce#
-#else
 > sCC _ x = x
 > coerceParser = id
-#endif
 
 > main = 
 
@@ -92,11 +84,6 @@ Mangle the syntax into something useful.
 >       in
 
 
-#ifdef DEBUG
-
->       optPrint cli DumpMangle (putStr (show gram)) >>
-
-#endif
 
 
 >       let first  	= sCC "First" (mkFirst g)
@@ -111,15 +98,6 @@ Mangle the syntax into something useful.
 >	    (conflictArray,(sr,rr))   = sCC "Conflict" (countConflicts action)
 >       in
 
-#ifdef DEBUG
-
->       optPrint cli DumpLR0 (putStr (show sets))		>>
->       optPrint cli DumpAction (putStr (show action))      	>>
->       optPrint cli DumpGoto (putStr (show goto))          	>>
->       optPrint cli DumpLA (putStr (show lainfo))		>>
->       optPrint cli DumpLA (putStr (show la))			>>
-
-#endif
 
 Report any unused rules and terminals
 
@@ -320,23 +298,6 @@ The command line arguments.
 >    Option ['v'] ["verbose"] (NoArg DumpVerbose)
 >       "Print out version info"
 
-#ifdef DEBUG
-
-Various debugging/dumping options...
-
->    ,
->    Option [] ["mangle"] (NoArg DumpMangle)
->	"Dump mangled input",
->    Option [] ["lr0"] (NoArg DumpLR0)
->	"Dump LR0 item sets",
->    Option [] ["action"] (NoArg DumpAction)
->	"Dump action table",
->    Option [] ["goto"] (NoArg DumpGoto)
->	"Dump goto table",
->    Option [] ["lookaheads"] (NoArg DumpLA)
->	"Dump lookahead info"
-
-#endif
 
 >    ]
 
@@ -417,7 +378,7 @@ Extract various command-line options.
 
 > syntax = unlines [
 >   "syntax: happy [-v] [-o | --outfile <file>] [--info [<file>]]",
->   "		   [-1.2] [--template <dir>]",
+>   "\t\t   [-1.2] [--template <dir>]",
 >   "              [-g | --ghc] [-a | --array] <file>\n" ]
 
 

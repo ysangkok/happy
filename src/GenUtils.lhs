@@ -47,33 +47,6 @@ HBC has it in one of its builtin modules
 >                       Nothing -> mapMaybe f r
 >                       Just b  -> b : mapMaybe f r
 
-#ifdef __GOFER__
-
- primitive primPrint "primPrint" :: Int -> a -> ShowS
-
-#endif
-
-#ifdef __GOFER__
-
- primitive primGenericEq "primGenericEq",
-           primGenericNe "primGenericNe",
-           primGenericLe "primGenericLe",
-           primGenericLt "primGenericLt",
-           primGenericGe "primGenericGe",
-           primGenericGt "primGenericGt"   :: a -> a -> Bool
-
- instance Show (Maybe a) where { showsPrec = primPrint } 
- instance Eq (Maybe a) where
-       (==) = primGenericEq 
-       (/=) = primGenericNe
-
- instance (Ord a) => Ord (Maybe a)
-   where 
-       Nothing  <=  _       = True
-       _        <=  Nothing = True
-       (Just a) <= (Just b) = a <= b
-
-#endif
 
 > maybeMap :: (a -> b) -> Maybe a -> Maybe b
 > maybeMap f (Just a) = Just (f a)

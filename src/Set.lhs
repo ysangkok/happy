@@ -28,13 +28,6 @@ License.
                       where showl []     = showChar '}'
                             showl (x:xs) = showChar ',' . shows x . showl xs
 
-#ifdef GOFER
-
- instance Eq (Set a) where { (==) = primGenericEq } 
- instance Ord [a] => Ord (Set a) where 
-       (MkSet a) <= (MkSet b) = a <= b
-
-#endif
 
 This is where we order the list and remove duplicates.
 

@@ -21,11 +21,6 @@ Here is the abstract syntax of the language we parse.
 >         [(String,[([String],String,Int)],Maybe String)]	-- productions
 >         (Maybe String)					-- footer
 
-#ifdef DEBUG
-
->   deriving Show
-
-#endif
 
 %-----------------------------------------------------------------------------
 Parser Generator Directives.
@@ -40,11 +35,6 @@ generate some error messages.
 >       | TokenLexer String String        -- %lexer
 >	| TokenMonad String String String -- %monad
 
-#ifdef DEBUG
-
->   deriving Show
-
-#endif
 
 > getTokenType ds 
 > 	= case [ t | (TokenType t) <- ds ] of 

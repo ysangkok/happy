@@ -21,12 +21,6 @@ Generation of LALR parsing tables.
 
 > import Array
 
-#if defined(__GLASGOW_HASKELL__)
-
-> import GlaExts
-> import ST (runST)
-
-#endif
 
 > type Lr0Item = (Int,Int)			-- (rule, dot)
 > type Lr1Item = (Int,Int,Set Name)		-- (rule, dot, lookahead)
@@ -263,7 +257,9 @@ calcLookaheads pass.
 >			[ (a,b) | (a,b) <- p ])
 >   where
 
->     (s,p) = unzip (zipWith propLASet sets [0..])
+>     fromZ :: [Int]
+>     fromZ = [0..]
+>     (s,p) = unzip (zipWith propLASet sets fromZ)
 
 >     propLASet (set,goto) i = (concat s, (i, concat p))
 >	where
@@ -297,128 +293,16 @@ calcLookaheads pass.
 -----------------------------------------------------------------------------
 Calculate lookaheads
 
-#if defined(__GLASGOW_HASKELL__)
-
-Special version using a mutable array for GHC.
-
 > calcLookaheads
 >	:: Int					-- number of states
 >	-> [(Int, Lr0Item, Set Name)]		-- spontaneous lookaheads
->	-> Array Int [(Lr0Item, Int, Lr0Item)]	-- propagated lookaheads
->	-> Array Int [(Lr0Item, Set Name)]
-
-#if __GLASGOW_HASKELL__ >= 200
-
-> calcLookaheads n_states spont prop
->	= runST (do
->	    array <- newArray (0,n_states) []
->	    propagate array (foldr fold_lookahead [] spont)
->	    freezeArray array
->	)
-
->   where
->	propagate array []  = return ()
->	propagate array new = do 
->		let
->		   items = [ (i,item'',s) | (j,item,s) <- new, 
->				            (item',i,item'') <- prop ! j,
->				            item == item' ]
->		new_new <- get_new array items []
->		add_lookaheads array new
->		propagate array new_new
-
-This function is needed to merge all the (set_no,item,name) triples
-into (set_no, item, set name) triples.  It can be removed when we get
-the spontaneous lookaheads in the right form to begin with (ToDo).
-
-> add_lookaheads array [] = return ()
-> add_lookaheads array ((i,item,s) : lookaheads) = do
->	las <- readArray array i
->	writeArray array i (add_lookahead item s las)
->	add_lookaheads array lookaheads
-
-> get_new array [] new = return new
-> get_new array (l@(i,item,s):las) new = do
->	state_las <- readArray array i
->	get_new array las (get_new' l state_las new)
-
-#else
-
-> calcLookaheads n_states spont prop
->	= _runST (
->	    newArray (0,n_states) [] `thenStrictlyST` \array ->
->	    propagate array (foldr fold_lookahead [] spont) 
->			`thenStrictlyST` \_ ->
->	    freezeArray array
->	)
-
->   where
->	propagate array []  = returnST ()
->	propagate array new =
->		let
->		   items = [ (i,item'',s) | (j,item,s) <- new, 
->				            (item',i,item'') <- prop ! j,
->				            item == item' ]
->		in
->		get_new array items [] 		`thenStrictlyST` \new_new ->
->		add_lookaheads array new 	`thenStrictlyST` \_ ->
->		propagate array new_new
-
-This function is needed to merge all the (set_no,item,name) triples
-into (set_no, item, set name) triples.  It can be removed when we get
-the spontaneous lookaheads in the right form to begin with (ToDo).
-
-> add_lookaheads array [] = returnST ()
-> add_lookaheads array ((i,item,s) : lookaheads) =
->	readArray array i `thenStrictlyST` \las ->
->	writeArray array i (add_lookahead item s las) `thenStrictlyST` \_ ->
->	add_lookaheads array lookaheads
-
-> get_new array [] new = returnST new
-> get_new array (l@(i,item,s):las) new =
->	readArray array i `thenStrictlyST` \state_las ->
->	get_new array las (get_new' l state_las new)
-
-#endif
-
-> add_lookahead :: Lr0Item -> Set Name -> [(Lr0Item,Set Name)] ->
-> 			[(Lr0Item,Set Name)]
-> add_lookahead item s [] = [(item,s)]
-> add_lookahead item s (m@(item',s') : las)
->	| item == item' = (item, s `union_Int` s') : las
->	| otherwise     = m : add_lookahead item s las
-
-> get_new' :: (Int,Lr0Item,Set Name) -> [(Lr0Item,Set Name)] ->
->		 [(Int,Lr0Item,Set Name)] -> [(Int,Lr0Item,Set Name)]
-> get_new' l [] new = l : new
-> get_new' l@(i,item,s) (m@(item',s') : las) new
->	| item == item' =
->		let s'' = filter (`notElem` s') s in
->		if null s'' then new else
->		((i,item,s''):new)
->	| otherwise = 
->		get_new' l las new
-
-> fold_lookahead :: (Int,Lr0Item,Set Name) -> [(Int,Lr0Item,Set Name)]
->		-> [(Int,Lr0Item,Set Name)]
-> fold_lookahead l [] = [l]
-> fold_lookahead l@(i,item,s) (m@(i',item',s'):las)
->  	| i == i' && item == item' = (i,item, s `union_Int` s'):las
->	| i < i' = (i,item,s):m:las
->	| otherwise = m : fold_lookahead l las
-
-#else /* not __GLASGOW_HASKELL */
-
-> calcLookaheads
->	:: Int					-- number of states
->	-> [(Int, Lr0Item, Name)]		-- spontaneous lookaheads
 >	-> Array Int [(Lr0Item, Int, Lr0Item)]	-- propagated lookaheads
 >	-> [(Int, Lr0Item, Set Name)]
 
 > calcLookaheads n_states spont prop
 >	= fst (mkClosure (\(_,new) _ -> null new) propagate
 >	   ([], foldr addLookahead []
->	   	[ (i,item,singletonSet t) | (i,item,t) <- spont]))
+>	   	[ (i,item,t) | (i,item,t) <- spont]))
 >	where
 
 >	  propagate (las,new) = 
@@ -450,15 +334,13 @@ the spontaneous lookaheads in the right form to begin with (ToDo).
 >	| i < i'    = (i,item,s):new
 >	| otherwise = getNew l las new
 
-#endif
-
 -----------------------------------------------------------------------------
 Merge lookaheads
 
 Stick the lookahead info back into the state table.
 
 > mergeLookaheadInfo
->	:: Array Int [(Lr0Item, Set Name)] 	-- lookahead info
+>	:: [(Int, Lr0Item, Set Name)] 	-- lookahead info
 >	-> [(Set Lr0Item, [(Name,Int)])] 	-- state table
 >	-> [ ([Lr1Item], [(Name,Int)]) ]
 
@@ -472,7 +354,8 @@ Stick the lookahead info back into the state table.
 
 >	  	  mergeIntoItem item@(rule,dot)
 >		     = [(rule,dot,la)]
->		     where la = case [ s | (item',s) <- lookaheads ! i,
+>		     where la = case [ s | (idx, item',s) <- lookaheads,
+>					    idx == i &&
 >					    item == item' ] of
 >					[] -> []
 >					[x] -> setToList x

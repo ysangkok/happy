@@ -7,9 +7,6 @@ import GenUtils
 import AbsSyn
 import Lexer
 
-#ifdef __GLASGOW_HASKELL__
-import GlaExts
-#endif
 
 data HappyAbsSyn 
 	= HappyTerminal Token
