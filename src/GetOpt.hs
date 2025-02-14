@@ -25,7 +25,7 @@ including a 46 line example! :-)
 
 module GetOpt (ArgOrder(..), OptDescr(..), ArgDescr(..), usageInfo, getOpt) where
 
-import List(isPrefixOf)
+import Data.List(isPrefixOf)
 
 data ArgOrder a                        -- what to do with options following non-options:
    = RequireOrder                      --    no option processing after first non-option

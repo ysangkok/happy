@@ -7,19 +7,13 @@ Abstract syntax for grammar files.
 (c) 1993-2001 Andy Gill, Simon Marlow
 -----------------------------------------------------------------------------
 
-Here is the abstract syntax of the language we parse.
+Here is the abstract syntax of the language we parse. -}
 
--}
-
- module AbsSyn (
-     AbsSyn(..), Directive(..),
-     getTokenType, getTokenSpec, getParserNames, getLexer, getMonad,
-       getPrios, getPrioNames,
-  ) where
-
-{-
-
--}
+module AbsSyn (
+    AbsSyn(..), Directive(..),
+    getTokenType, getTokenSpec, getParserNames, getLexer, getMonad,
+      getPrios, getPrioNames,
+ ) where
 
  data AbsSyn
      = AbsSyn
@@ -27,26 +21,16 @@ Here is the abstract syntax of the language we parse.
          [Directive String]                      -- directives
          [(String,[([String],String,Int,Maybe String)],Maybe String)]    -- productions
          (Maybe String)                    -- footer
-
-{-
-
 #ifdef DEBUG
-
--}
-
    deriving Show
-
-{-
-
 #endif
 
+{-
 %-----------------------------------------------------------------------------
 Parser Generator Directives.
 
 ToDo: find a consistent way to analyse all the directives together and
-generate some error messages.
-
--}
+generate some error messages. -}
 
  data Directive a
        = TokenType     String                  -- %tokentype
@@ -57,20 +41,9 @@ generate some error messages.
     | TokenNonassoc [String]          -- %nonassoc
     | TokenRight    [String]        -- %right
     | TokenLeft     [String]        -- %left
-
-{-
-
 #ifdef DEBUG
-
--}
-
    deriving Show
-
-{-
-
 #endif
-
--}
 
  getTokenType ds 
      = case [ t | (TokenType t) <- ds ] of 
@@ -78,55 +51,36 @@ generate some error messages.
         []  -> error "no token type given"
         _   -> error "multiple token types"
 
-{-
-
--}
 
  getParserNames ds = [ t | t@(TokenName _ _) <- ds ]
 
-{-
-
--}
 
  getLexer ds 
      = case [ (a,b) | (TokenLexer a b) <- ds ] of
          [t] -> Just t
-        []  -> Nothing
-        _   -> error "multiple lexer directives"
+         []  -> Nothing
+         _   -> error "multiple lexer directives"
 
-{-
-
--}
 
  getMonad ds 
      = case [ (a,b,c) | (TokenMonad a b c) <- ds ] of
          [t] -> Just t
-        []  -> Nothing
-        _   -> error "multiple monad directives"
+         []  -> Nothing
+         _   -> error "multiple monad directives"
 
-{-
-
--}
 
  getTokenSpec ds = concat [ t | (TokenSpec t) <- ds ]
 
-{-
-
--}
 
  getPrios ds = [ d | d <- ds,
                  case d of
-            TokenNonassoc _ -> True
-            TokenLeft _ -> True
-            TokenRight _ -> True
-            _ -> False
+                   TokenNonassoc _ -> True
+                   TokenLeft _ -> True
+                   TokenRight _ -> True
+                   _ -> False
                ]
 
-{-
-
--}
 
  getPrioNames (TokenNonassoc s) = s
  getPrioNames (TokenLeft s)     = s
  getPrioNames (TokenRight s)    = s
--}
