@@ -1,3 +1,4 @@
+{-
 -----------------------------------------------------------------------------
 $Id: GetOpt.lhs,v 1.6 2003/07/08 15:16:44 panne Exp $
 
@@ -20,7 +21,8 @@ compliant... :-( And a final Haskell advertisement: The GNU C
 implementation uses well over 1100 lines, we need only 195 here,
 including a 46 line example! :-)
 
-\begin{code}
+-}
+
 module GetOpt (ArgOrder(..), OptDescr(..), ArgDescr(..), usageInfo, getOpt) where
 
 import List(isPrefixOf)
@@ -196,4 +198,6 @@ test order cmdline = case getOpt order options cmdline of
 --          -n USER   --name=USER           only dump USER's files
 -----------------------------------------------------------------------------------------
 -}
-\end{code}
+
+{-
+-}
