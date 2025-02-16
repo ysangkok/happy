@@ -1,3 +1,18 @@
+This was tested with MicroHs as of Feb 15th, 2025.
+
+I used the following command to generate `HappyTemplate`, the Perl is taken from the Makefile.
+
+  sudo mkdir /usr/local/lib/happy
+  cpp GenericTemplate.hs | perl -pe 's/^#\s+(\d+)\s+(\"[^\"]*\")/{-# LINE \1 \2 #-}/g;s/\$$(Id:.*)\$$/\1/g' | sed "s/$(printf '\t')/        /g" | sudo tee /usr/local/lib/happy/HappyTemplate
+
+For compiling, I used
+
+  mhs -isrc -XCPP Main -o main
+
+Original README follows.
+
+---
+
 This is Happy version 1.13, a parser generator for Haskell 98.
 
 WWW:	http://www.haskell.org/happy/

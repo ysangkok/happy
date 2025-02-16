@@ -542,7 +542,7 @@ Generating the goto table doesn't need lookahead info. -}
             Nothing | isStartRule rule -> [ (eof,LR'Accept{-'-}) ]
                     | otherwise -> case lookupProdNo g rule of
                        (_,_,_,p) -> zip la (repeat (LR'Reduce rule p))
-                       _ -> []
+            _ -> []
 
 
     possActions goto coll =
